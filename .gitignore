@@ -1,0 +1,13 @@
+build
+libraries
+*.swp
+*~
+Makefile
+*.hex
+*.DS_Store
+.vscode
+*.uf2
+*.bin
+pxtapp
+buildcache.json
+*.pyc
