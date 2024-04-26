@@ -3,6 +3,10 @@
 A C++ example project showing how to measure the BBC micro:bit V2 battery
 voltage.
 
+All the ADC channels are currently used for the Analogue pins and the on-board
+microphone, so for this project we hijack the ADC channel used for P0 and
+re-route it to the internal Vdd (voltage from the microcontroller power input).
+
 ## Building the project
 
 ### Dependencies
