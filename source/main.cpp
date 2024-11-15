@@ -2,6 +2,8 @@
 
 MicroBit uBit;
 
+// Configures the interval (in seconds) between battery voltage logs 
+static size_t LOGGING_INTERVAL_SECS = 60;
 
 // The ADC channel to be used for the battery voltage measurement
 static int BATTERY_ADC_CHANNEL = -1;
@@ -70,6 +72,69 @@ static void vdd_adc_init() {
     (void)get_vdd_millivolts();
 }
 
+/**
+ * Log the battery voltage every minute.
+ *
+ * The logging interval is set by the LOGGING_INTERVAL_SECS global variable.
+ * Once the log is full, a cross is displayed on the LED matrix and the program
+ * stops running.
+ */
+static void log_battery_voltage() {
+    // First turn on all display LEDS on
+    for (int row = 0; row < 5; row++) {
+        for (int col = 0; col < 5; col++) {
+            uBit.display.image.setPixelValue(row, col, 255);
+        }
+    }
+
+    // Configure data logging and clear any previous data
+    uBit.log.setSerialMirroring(false);
+    uBit.log.setTimeStamp(TimeStampFormat::Seconds);
+    uBit.log.clear(false);
+    uBit.log.setVisibility(true);
+
+    // Read the battery voltage every second, average it over 60 seconds and log it
+    const size_t BUFFER_SIZE = LOGGING_INTERVAL_SECS;
+    int voltages[BUFFER_SIZE] = {0};
+    size_t voltages_index = 0;
+
+    uint32_t next_log_time = uBit.systemTime();
+    while (!uBit.log.isFull()) {
+        while (uBit.systemTime() < next_log_time);
+        next_log_time += LOGGING_INTERVAL_SECS * 1000;
+
+        voltages[voltages_index] = get_vdd_millivolts();
+        voltages_index++;
+
+        if (voltages_index >= BUFFER_SIZE) {
+            voltages_index = 0;
+            int voltage_sum = 0;
+            for (size_t i = 0; i < BUFFER_SIZE; i++) {
+                voltage_sum += voltages[i];
+            }
+            int voltage_average = voltage_sum / BUFFER_SIZE;
+
+            uBit.log.beginRow();
+            uBit.log.logData("mV", ManagedString(voltage_average));
+            uBit.log.endRow();
+        }
+    }
+
+    // Log storage is full, show a cross on the display
+    const MicroBitImage IMG_CROSS(
+        "255,000,000,000,255\n"
+        "000,255,000,255,000\n"
+        "000,000,255,000,000\n"
+        "000,255,000,255,000\n"
+        "255,000,000,000,255\n"
+    );
+    uBit.display.print(IMG_CROSS);
+    while (true) {
+        uBit.sleep(1000);
+    }
+}
+
+
 int main() {
     uBit.init();
 
@@ -80,6 +145,11 @@ int main() {
 
         uBit.serial.send(battery_mv + "\r\n");
         uBit.display.scroll(battery_mv);
+
+        // On button A enter into a mode where the battery voltage into logged once per minute
+        if (uBit.buttonA.isPressed()) {
+            log_battery_voltage();
+        }
 
         uBit.sleep(1000);
     }

@@ -1,16 +1,36 @@
 # BBC micro:bit V2 Battery Voltage Measurement
 
-A C++ example project showing how to measure the BBC micro:bit V2 battery
+A micro:bit C++ project showing how to measure the BBC micro:bit V2 battery
 voltage.
 
-This project measures the input voltage, in millivolts, from the nRF52833
-microcontroller and prints it on the display and serial.
+This project measures the input voltage, in millivolts, of the nRF52833
+microcontroller. It shows the value on the micro:bit display and also sends
+it via serial.
 
-A prebuilt hex file can be download from the
+It's important to note that the battery voltage is not exactly the same
+as the microcontroller input voltage, as there is some
+[safety circuitry](https://github.com/microbit-foundation/microbit-v2-hardware)
+between the battery and the microcontroller that will produce a small voltage
+drop.
+
+A prebuilt hex file can be downloaded from the
 [GitHub Releases page](https://github.com/microbit-foundation/microbit-v2-battery-voltage/releases).
 
 A similar example for micro:bit V1 can be found in:
 https://os.mbed.com/teams/microbit/code/microbit-battery-test/
+
+## Logging the voltage
+
+If the button A is pressed (keep it pressed until the text stops scrolling and
+all display LEDs are on), the battery voltage will be logged into the
+[data log](https://microbit.org/get-started/user-guide/data-logging/).
+
+The voltage is logged once per minute, and when the log is full
+(it should take over 5 days) a cross will be displayed and the programme will
+stop running.
+
+The data-log can then be accessed by connecting the micro:bit to a computer
+and opening the `MY_DATA.HTM` file inside the `MICROBIT` USB drive.
 
 ## How is the battery voltage measured
 
