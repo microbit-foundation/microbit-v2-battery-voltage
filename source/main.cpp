@@ -90,7 +90,7 @@ static void log_battery_voltage() {
     // Configure data logging and clear any previous data
     uBit.log.setSerialMirroring(false);
     uBit.log.setTimeStamp(TimeStampFormat::Seconds);
-    uBit.log.clear(false);
+    uBit.log.clear(true);
     uBit.log.setVisibility(true);
 
     // Read the battery voltage every second, average it over 60 seconds and log it
@@ -101,7 +101,7 @@ static void log_battery_voltage() {
     uint32_t next_log_time = uBit.systemTime();
     while (!uBit.log.isFull()) {
         while (uBit.systemTime() < next_log_time);
-        next_log_time += LOGGING_INTERVAL_SECS * 1000;
+        next_log_time += 1000;
 
         voltages[voltages_index] = get_vdd_millivolts();
         voltages_index++;
